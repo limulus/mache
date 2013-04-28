@@ -1,0 +1,29 @@
+{
+  "name": "mache",
+  "version": "0.0.0",
+  "description": "Maps files to objects in a cache.",
+  "main": "index.js",
+  "devDependencies": {
+    "mocha": "~1.9.0"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/limulus/mache.git"
+  },
+  "keywords": [
+    "mache",
+    "cache",
+    "file"
+  ],
+  "contributors": [
+    {
+      "name": "Eric McCarthy",
+      "email": "eric@limulus.net",
+      "url": "http://www.limulus.net/"
+    }
+  ],
+  "license": "MIT"
+}
