@@ -2,7 +2,7 @@
 
 var fs = require('fs')
   , path = require('path')
-  , parents = require('parents')
+  , subdir = require('subdir')
 
 /**
  * Caches objects created from files in a given directory.
@@ -47,12 +47,7 @@ Mache.prototype.path = function (result) {
 Mache.prototype.get = function (file, result) {
     this.path(function (err, baseDir) {
         var fullFilePath = path.join(baseDir, file)
-
-        var fileIsInBaseDir = parents(fullFilePath).some(function (parentDir) {
-            return parentDir === baseDir
-        })
-
-        if (!fileIsInBaseDir) {
+        if (!subdir(baseDir, fullFilePath)) {
             var msg = 'File "' + fullFilePath
               + '" is outside base directory "' + baseDir + '".'
             return result(new Error(msg), undefined)

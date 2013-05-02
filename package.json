@@ -4,7 +4,7 @@
   "description": "Maps files to objects in a cache.",
   "main": "index.js",
   "dependencies": {
-    "parents": "0.0.1"
+    "subdir": "~0.0.2"
   },
   "devDependencies": {
     "mocha": "~1.9.0",
