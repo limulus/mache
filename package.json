@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Maps files to objects in a cache.",
   "main": "index.js",
+  "dependencies": {
+    "parents": "0.0.1"
+  },
   "devDependencies": {
     "mocha": "~1.9.0",
     "temp": "~0.5.0"

@@ -2,6 +2,7 @@
 
 var fs = require('fs')
   , path = require('path')
+  , parents = require('parents')
 
 /**
  * Caches objects created from files in a given directory.
@@ -10,25 +11,30 @@ var fs = require('fs')
  * @param {string} dirPath
  * @param {function(string, string, function(*))} objectCreator
  */
-var Mache = function (dirPath, objectCreator) {
-	this._suppliedPath = dirPath
-    this._realPath = null
+var Mache = function (baseDirPath, objectCreator) {
+	this._suppliedBaseDirPath = baseDirPath
+    this._baseDir = null
     this._objectCreator = objectCreator
 }
 
 /**
  * Gets the full path to the directory this mache is using.
  * @public
- * @param {function(Error?, string)} callback
+ * @param {function(Error?, string)} result
  */
-Mache.prototype.path = function (callback) {
-    if (this._realPath) {
-        callback(undefined, this._realPath)
+Mache.prototype.path = function (result) {
+    if (this._baseDir) {
+        return result(undefined, this._baseDir)
     }
     else {
-        fs.realpath(this._suppliedPath, function (err, actualPath) {
-            this._realPath = actualPath
-            callback(err, this._realPath)
+        fs.realpath(this._suppliedBaseDirPath, function (err, actualPath) {
+            if (!err) {
+                this._baseDir = path.normalize(actualPath)
+                return result(err, this._baseDir)
+            }
+            else {
+                return result(err)
+            }
         }.bind(this))
     }
 }
@@ -36,21 +42,32 @@ Mache.prototype.path = function (callback) {
 /**
  * @public
  * @param {string} file
- * @param {function(Error?, *)} returnResult
+ * @param {function(Error?, *)} result
  */
-Mache.prototype.get = function (file, returnResult) {
-    this.path(function (err, fullDirPath) {
-        var fullFilePath = path.join(fullDirPath, file)
+Mache.prototype.get = function (file, result) {
+    this.path(function (err, baseDir) {
+        var fullFilePath = path.join(baseDir, file)
+
+        var fileIsInBaseDir = parents(fullFilePath).some(function (parentDir) {
+            return parentDir === baseDir
+        })
+
+        if (!fileIsInBaseDir) {
+            var msg = 'File "' + fullFilePath
+              + '" is outside base directory "' + baseDir + '".'
+            return result(new Error(msg), undefined)
+        }
+        
         fs.readFile(fullFilePath, function (err, data) {
             var objectCreator = this._objectCreator
 
             if (err) {
-                returnResult(err)
+                return result(err)
             }
             else {
                 objectCreator(file, data, function (obj) {
                     // ... add obj to cache
-                    returnResult(undefined, obj)
+                    return result(undefined, obj)
                 })
             }
         }.bind(this))

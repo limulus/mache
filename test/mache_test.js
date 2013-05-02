@@ -7,7 +7,7 @@ var mache = require('../index.js')
   , path = require('path')
 
 // Temporary directory to base our mache out of.
-var testDir = temp.mkdirSync()
+var testDir = fs.realpathSync(temp.mkdirSync())
 
 // Create some files in the temporary directory so we have something to test.
 var testData1 = '{"id": 1}'
@@ -30,11 +30,27 @@ describe('#get', function () {
 			done()
 		})
 	})
+
+    it("should return an error if the requested file does not exist", function (done) {
+        testMache.get('foo.json', function (err, testObjFoo) {
+            assert.ok(err)
+            done()
+        })
+    })
+
+    it("should return an error if the requested file is outside the base directory", function (done) {
+        var outsideJSONFile = path.join(__dirname, 'data/foo.json')
+        var relativePathToOutsideFile = path.relative(testDir, outsideJSONFile)
+        testMache.get(relativePathToOutsideFile, function (err, testObjFoo) {
+            assert.ok(err)
+            done()
+        })
+    })
 })
 
 describe("#path", function () {
     it("should return the full path even when created with a relative path", function (done) {
-        // Recreate testMache using a relative path
+        // Make our own testMache using a relative path
         testMache = mache.create('.', function (fp, d, macheUpdate) {
             macheUpdate(null)
         })
@@ -48,7 +64,7 @@ describe("#path", function () {
     })
 
     it("should return an error if the directory doesn't exist", function (done) {
-        // Recreate testMache using a non-existent path
+        // Make our own testMache using a non-existent path
         testMache = mache.create('./does/not/exist/i/hope', function (fp, d, macheUpdate) {
             macheUpdate(null)
         })
