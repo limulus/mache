@@ -3,7 +3,6 @@
 var fs = require('fs')
   , path = require('path')
   , subdir = require('subdir')
-  , domain = require('domain')
 
 /**
  * Caches objects created from files in a given directory.
@@ -46,30 +45,46 @@ Mache.prototype.path = function (result) {
  * @param {function(Error?, *)} result
  */
 Mache.prototype.get = function (file, result) {
-    var d = domain.create().on('error', function (e) { return result(e) })
+    this._stringContentForFile(file, function (err, data) {
+        if (err) return result(err)
 
-    this.path(d.intercept(function (baseDir) {
-        var fullFilePath = Mache._fullFilePathUnderBaseDir(baseDir, file)
-        
-        fs.readFile(fullFilePath, d.intercept(function (data) {
-            var objectCreator = this._objectCreator
-
-            objectCreator(file, data, function (obj) {
-                // ... add obj to cache
-                return result(undefined, obj)
-            })
-        }.bind(this)))
-    }.bind(this)))
+        var objectCreator = this._objectCreator
+        objectCreator(file, data, function (obj) {
+            // ... add obj to cache
+            return result(undefined, obj)
+        })
+    }.bind(this))
 }
 
-Mache._fullFilePathUnderBaseDir = function (baseDir, file) {
-    var fullFilePath = path.join(baseDir, file)
-    if (!subdir(baseDir, fullFilePath)) {
-        var msg = 'File "' + fullFilePath
-          + '" is outside base directory "' + baseDir + '".'
-        throw new Error(msg)
-    }
-    return fullFilePath
+/**
+ * @private
+ * @param {string} file
+ * @param {function(Error?, string)} result
+ */
+Mache.prototype._stringContentForFile = function (file, result) {
+    this._fullPathForFile(file, function (err, fullFilePath) {
+        if (err) return result(err)
+        fs.readFile(fullFilePath, result)
+    }.bind(this))
+}
+
+/**
+ * @private
+ * @param {string} file
+ * @param {function(Error?, string)} result
+ */
+Mache.prototype._fullPathForFile = function (file, result) {
+    this.path(function (err, baseDir) {
+        if (err) return result(err)
+
+        var fullFilePath = path.join(baseDir, file)
+        if (!subdir(baseDir, fullFilePath)) {
+            var msg = 'File "' + fullFilePath
+              + '" is outside base directory "' + baseDir + '".'
+            return result(new Error(msg))
+        }
+        return result(null, fullFilePath)
+    }.bind(this))
 }
 
 /**
