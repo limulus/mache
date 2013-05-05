@@ -24,7 +24,7 @@ var Mache = function (baseDirPath, objectCreator) {
  */
 Mache.prototype.path = function (result) {
     if (this._baseDir) {
-        return result(undefined, this._baseDir)
+        return result(null, this._baseDir)
     }
     else {
         fs.realpath(this._suppliedBaseDirPath, function (err, actualPath) {
@@ -51,7 +51,7 @@ Mache.prototype.get = function (file, result) {
         var objectCreator = this._objectCreator
         objectCreator(file, data, function (obj) {
             // ... add obj to cache
-            return result(undefined, obj)
+            return result(null, obj)
         })
     }.bind(this))
 }
