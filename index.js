@@ -18,11 +18,11 @@ var Mache = function (baseDirPath, objectCreator) {
 }
 
 /**
- * Gets the full path to the directory this mache is using.
+ * Gets the full path to the base directory this mache is using.
  * @public
  * @param {function(Error?, string)} result
  */
-Mache.prototype.path = function (result) {
+Mache.prototype.baseDir = function (result) {
     if (this._baseDir) {
         return result(null, this._baseDir)
     }
@@ -74,7 +74,7 @@ Mache.prototype._stringContentForFile = function (file, result) {
  * @param {function(Error?, string)} result
  */
 Mache.prototype._fullPathForFile = function (file, result) {
-    this.path(function (err, baseDir) {
+    this.baseDir(function (err, baseDir) {
         if (err) return result(err)
 
         var fullFilePath = path.join(baseDir, file)

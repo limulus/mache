@@ -48,7 +48,7 @@ describe('#get', function () {
     })
 })
 
-describe("#path", function () {
+describe("#baseDir", function () {
     it("should return the full path even when created with a relative path", function (done) {
         // Make our own testMache using a relative path
         testMache = mache.create('.', function (fp, d, macheUpdate) {
@@ -56,7 +56,7 @@ describe("#path", function () {
         })
 
         var actualPath = fs.realpathSync('.')
-        testMache.path(function (err, machePath) {
+        testMache.baseDir(function (err, machePath) {
             assert.ifError(err)
             assert.strictEqual(actualPath, machePath)
             done()
@@ -69,7 +69,7 @@ describe("#path", function () {
             macheUpdate(null)
         })
 
-        testMache.path(function (err, machePath) {
+        testMache.baseDir(function (err, machePath) {
             assert.ok(err)
             done()
         })
