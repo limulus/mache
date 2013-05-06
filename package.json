@@ -14,7 +14,8 @@
     "node": ">=0.8.0"
   },
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha"
+    "test": "./node_modules/mocha/bin/mocha",
+    "debug": "./node_modules/mocha/bin/mocha --debug-brk"
   },
   "repository": {
     "type": "git",

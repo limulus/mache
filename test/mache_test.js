@@ -46,6 +46,18 @@ describe('#get', function () {
             done()
         })
     })
+
+    it("should return the exact same object if underlying file has not changed", function (done) {
+        testMache.get('1.json', function (err, expectedObj) {
+            assert.ifError(err)
+            testMache.get('1.json', function (err, cachedObj) {
+                debugger
+                assert.ifError(err)
+                assert.strictEqual(expectedObj, cachedObj)
+                done()
+            })
+        })
+    })
 })
 
 describe("#baseDir", function () {

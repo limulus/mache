@@ -15,6 +15,7 @@ var Mache = function (baseDirPath, objectCreator) {
     this._suppliedBaseDirPath = baseDirPath
     this._baseDir = null
     this._objectCreator = objectCreator
+    this._cache = {}
 }
 
 /**
@@ -45,14 +46,18 @@ Mache.prototype.baseDir = function (result) {
  * @param {function(Error?, *)} result
  */
 Mache.prototype.get = function (file, result) {
+    if (this._cache[file]) {
+        return result(null, this._cache[file])
+    }
+
     this._stringContentForFile(file, function (err, data) {
         if (err) return result(err)
 
         var objectCreator = this._objectCreator
         objectCreator(file, data, function (obj) {
-            // ... add obj to cache
+            this._cache[file] = obj
             return result(null, obj)
-        })
+        }.bind(this))
     }.bind(this))
 }
 
