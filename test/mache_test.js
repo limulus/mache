@@ -12,7 +12,10 @@ var testDir = fs.realpathSync(temp.mkdirSync())
 // Create some files in the temporary directory so we have something to test.
 var testData1 = '{"id": 1}'
 fs.writeFileSync(path.join(testDir, '1.json'), testData1)
+var testData2 = '{"id": 2}'
+fs.writeFileSync(path.join(testDir, '2.json'), testData2)
 
+// Set up the mache object we'll use for most of these tests.
 var testMache
 beforeEach(function () {
 	testMache = mache.create(testDir, function (filePath, data, macheUpdate) {
@@ -44,6 +47,38 @@ describe('#get', function () {
         testMache.get(relativePathToOutsideFile, function (err, testObjFoo) {
             assert.ok(err)
             done()
+        })
+    })
+
+    it("should return the exact same object if underlying file has not changed", function (done) {
+        testMache.get('1.json', function (err, expectedObj) {
+            assert.ifError(err)
+            testMache.get('1.json', function (err, cachedObj) {
+                debugger
+                assert.ifError(err)
+                assert.strictEqual(expectedObj, cachedObj)
+                done()
+            })
+        })
+    })
+
+    it("should return a new object if the underlying file has changed", function (done) {
+        var testFilePath = path.join(testDir, '2.json')
+        var oldTime = new Date("June 4, 1981 18:00:00")
+        fs.utimesSync(testFilePath, oldTime, oldTime)
+
+        testMache.get('2.json', function (err, objFromFirstGet) {
+            assert.ifError(err)
+
+            var newTime = new Date()
+            fs.utimesSync(testFilePath, newTime, newTime)
+
+            testMache.get('2.json', function (err, objFromSecondGet) {
+                assert.ifError(err)
+
+                assert.notStrictEqual(objFromFirstGet, objFromSecondGet)
+                done()
+            })
         })
     })
 })

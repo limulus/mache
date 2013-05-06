@@ -15,6 +15,8 @@ var Mache = function (baseDirPath, objectCreator) {
     this._suppliedBaseDirPath = baseDirPath
     this._baseDir = null
     this._objectCreator = objectCreator
+    this._cache = {}
+    this._fullPathCache = {}
 }
 
 /**
@@ -26,17 +28,13 @@ Mache.prototype.baseDir = function (result) {
     if (this._baseDir) {
         return result(null, this._baseDir)
     }
-    else {
-        fs.realpath(this._suppliedBaseDirPath, function (err, actualPath) {
-            if (!err) {
-                this._baseDir = path.normalize(actualPath)
-                return result(err, this._baseDir)
-            }
-            else {
-                return result(err)
-            }
-        }.bind(this))
-    }
+
+    fs.realpath(this._suppliedBaseDirPath, function (err, actualPath) {
+        if (err) return result(err)
+
+        this._baseDir = path.normalize(actualPath)
+        return result(err, this._baseDir)
+    }.bind(this))
 }
 
 /**
@@ -45,14 +43,56 @@ Mache.prototype.baseDir = function (result) {
  * @param {function(Error?, *)} result
  */
 Mache.prototype.get = function (file, result) {
+    var cachedMtime, cachedObj
+    if (this._cache[file]) {
+        cachedMtime = this._cache[file][0]
+        cachedObj = this._cache[file][1]
+    }
+
+    this._mtimeForFile(file, function (err, currentMtime) {
+        if (err) return result(err)
+
+        if (cachedMtime === currentMtime) {
+            return result(null, cachedObj)
+        }
+        else {
+            this._updateCacheForFileWithMtime(file, currentMtime, result)
+        }
+    }.bind(this))
+}
+
+/**
+ * @private
+ * @param {string} file
+ * @param {function(Error?, number)}
+ */
+Mache.prototype._mtimeForFile = function (file, result) {
+    this._fullPathForFile(file, function (err, fullFilePath) {
+        if (err) return result(err)
+
+        fs.stat(fullFilePath, function (err, stats) {
+            if (err) return result(err)
+
+            return result(null, stats.mtime.getTime())
+        }.bind(this))
+    }.bind(this))
+}
+
+/**
+ * @private
+ * @param {string} file
+ * @param {number} mtime
+ * @param {function(Error?, *)}
+ */
+Mache.prototype._updateCacheForFileWithMtime = function (file, mtime, result) {
     this._stringContentForFile(file, function (err, data) {
         if (err) return result(err)
 
         var objectCreator = this._objectCreator
         objectCreator(file, data, function (obj) {
-            // ... add obj to cache
+            this._cache[file] = [mtime, obj]
             return result(null, obj)
-        })
+        }.bind(this))
     }.bind(this))
 }
 
@@ -74,6 +114,10 @@ Mache.prototype._stringContentForFile = function (file, result) {
  * @param {function(Error?, string)} result
  */
 Mache.prototype._fullPathForFile = function (file, result) {
+    if (this._fullPathCache[file]) {
+        return result(null, this._fullPathCache[file])
+    }
+
     this.baseDir(function (err, baseDir) {
         if (err) return result(err)
 
@@ -83,6 +127,8 @@ Mache.prototype._fullPathForFile = function (file, result) {
               + '" is outside base directory "' + baseDir + '".'
             return result(new Error(msg))
         }
+
+        this._fullPathCache[file] = fullFilePath
         return result(null, fullFilePath)
     }.bind(this))
 }
