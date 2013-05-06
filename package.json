@@ -1,7 +1,7 @@
 {
   "name": "mache",
   "version": "0.0.0",
-  "description": "Maps files to objects in a cache.",
+  "description": "An in-memory, self-invalidating, file-to-object cache.",
   "main": "index.js",
   "dependencies": {
     "subdir": "~0.0.2"

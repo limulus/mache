@@ -18,7 +18,7 @@ beforeEach(function () {
 	testMache = mache.create(testDir, function (filePath, data, macheUpdate) {
 		var testObj = JSON.parse(data)
 		testObj._path = filePath
-		macheUpdate(testObj)
+		return macheUpdate(testObj)
 	})
 })
 
