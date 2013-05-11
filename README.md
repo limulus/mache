@@ -1,4 +1,4 @@
-Mache   [![Build Status](https://travis-ci.org/limulus/mache.png)](https://travis-ci.org/limulus/mache)
+Mache   [![Build Status](https://travis-ci.org/limulus/mache.png?branch=master)](https://travis-ci.org/limulus/mache)
 =====
 
 A **mache** is an in-memory, self-invalidating, file-to-object cache.
@@ -6,7 +6,7 @@ A **mache** is an in-memory, self-invalidating, file-to-object cache.
 Synopsis
 --------
 
-This Node.js module attempts to solve the problem of needing fast and up-to-date access to objects created from files in a given directory. When you create a Mache instance, you specify a **base directory** where the files are stored and an **object creation callback**. Objects created by your object creation function are **automatically cached** and subsequent requests for the object associated with the given file are retrieved from the cache. When the underlying file changes, your object creation function is automatically called again and the cache is updated.
+This Node.js module attempts to solve the problem of needing fast and up-to-date access to objects created from files in a given directory. When you create a Mache instance, you specify a **base directory** where the files are stored and an **object creation callback**. Objects created by your object creation callback are **automatically cached** and subsequent requests for the object associated with the given file are retrieved from the cache. When the underlying file changes, your object creation callback is automatically called again and the cache is updated.
 
 
 Installation
