@@ -106,8 +106,30 @@ describe("#baseDir", function () {
 })
 
 describe("#on invalidation", function () {
-    it.skip("should call the invalidation callback when a file changes", function (done) {
-        done()
+    it("should call the invalidation callback with the old object when a file changes", function (done) {
+        var objFromFirstGet
+          , invalidationEventFired
+
+        testMache.on('invalidation', function (err, invalidatedObj) {
+            assert.ifError(err)
+            assert.ok(objFromFirstGet)
+            assert.ok(invalidatedObj)
+            assert.strictEqual(objFromFirstGet, invalidatedObj)
+            invalidationEventFired = true
+        })
+
+        testMache.get('2.json', function (err, _objFromFirstGet) {
+            assert.ifError(err)
+
+            objFromFirstGet = _objFromFirstGet
+
+            setModifiedTimeOnTestFileToDistantPast('2.json')
+            testMache.get('2.json', function (err, objFromSecondGet) {
+                assert.ifError(err)
+                assert.ok(invalidationEventFired)
+                done()
+            })
+        })
     })
 })
 

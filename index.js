@@ -3,6 +3,8 @@
 var fs = require('fs')
   , path = require('path')
   , subdir = require('subdir')
+  , EventEmitter = require('events').EventEmitter
+  , inherits = require('util').inherits
 
 /**
  * Caches objects created from files in a given directory.
@@ -12,12 +14,15 @@ var fs = require('fs')
  * @param {function(string, string, function(*))} objectCreator
  */
 var Mache = function (baseDirPath, objectCreator) {
+    EventEmitter.call(this)
+
     this._suppliedBaseDirPath = baseDirPath
     this._baseDir = null
     this._objectCreator = objectCreator
     this._cache = {}
     this._fullPathCache = {}
 }
+inherits(Mache, EventEmitter)
 
 /**
  * Gets the full path to the base directory this mache is using.
@@ -56,6 +61,10 @@ Mache.prototype.get = function (file, result) {
             return result(null, cachedObj)
         }
         else {
+            if (cachedObj) {
+                this._invalidateCachedObjForFile(cachedObj, file)
+            }
+
             this._updateCacheForFileWithMtime(file, currentMtime, result)
         }
     }.bind(this))
@@ -131,6 +140,16 @@ Mache.prototype._fullPathForFile = function (file, result) {
         this._fullPathCache[file] = fullFilePath
         return result(null, fullFilePath)
     }.bind(this))
+}
+
+/**
+ * @private
+ * @param {obj} obj
+ * @param {string} file
+ */
+Mache.prototype._invalidateCachedObjForFile = function (obj, file) {
+    this._cache[file] = null
+    this.emit('invalidation', null, obj)
 }
 
 /**
