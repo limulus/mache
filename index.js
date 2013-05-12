@@ -6,6 +6,17 @@ var fs = require('fs')
   , EventEmitter = require('events').EventEmitter
   , inherits = require('util').inherits
 
+
+/**
+ * @public
+ * @param {string} dirPath
+ * @param {function(string, string, function(*))} objectCreator
+ * @return {Mache}
+ */
+module.exports.create = function (dirPath, objectCreator) {
+    return new Mache(dirPath, objectCreator)
+}
+
 /**
  * Caches objects created from files in a given directory.
  * @private
@@ -143,6 +154,7 @@ Mache.prototype._fullPathForFile = function (file, result) {
 }
 
 /**
+ * Invalidates the cached object associated with the sepcified file.
  * @private
  * @param {obj} obj
  * @param {string} file
@@ -150,14 +162,4 @@ Mache.prototype._fullPathForFile = function (file, result) {
 Mache.prototype._invalidateCachedObjForFile = function (obj, file) {
     this._cache[file] = null
     this.emit('invalidation', null, obj)
-}
-
-/**
- * @public
- * @param {string} dirPath
- * @param {function(string, string, function(*))} objectCreator
- * @return {Mache}
- */
-module.exports.create = function (dirPath, objectCreator) {
-	return new Mache(dirPath, objectCreator)
 }
