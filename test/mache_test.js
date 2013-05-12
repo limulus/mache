@@ -54,7 +54,6 @@ describe('#get', function () {
         testMache.get('1.json', function (err, expectedObj) {
             assert.ifError(err)
             testMache.get('1.json', function (err, cachedObj) {
-                debugger
                 assert.ifError(err)
                 assert.strictEqual(expectedObj, cachedObj)
                 done()
@@ -63,16 +62,11 @@ describe('#get', function () {
     })
 
     it("should return a new object if the underlying file has changed", function (done) {
-        var testFilePath = path.join(testDir, '2.json')
-        var oldTime = new Date("June 4, 1981 18:00:00")
-        fs.utimesSync(testFilePath, oldTime, oldTime)
-
+        setModifiedTimeOnTestFileToDistantPast('2.json')
         testMache.get('2.json', function (err, objFromFirstGet) {
             assert.ifError(err)
 
-            var newTime = new Date()
-            fs.utimesSync(testFilePath, newTime, newTime)
-
+            setModifiedTimeOnTestFileToNow('2.json')
             testMache.get('2.json', function (err, objFromSecondGet) {
                 assert.ifError(err)
 
@@ -110,3 +104,43 @@ describe("#baseDir", function () {
         })
     })
 })
+
+describe("#on invalidation", function () {
+    it("should call the invalidation callback with the old object when a file changes", function (done) {
+        var objFromFirstGet
+          , invalidationEventFired
+
+        testMache.on('invalidation', function (err, invalidatedObj) {
+            assert.ifError(err)
+            assert.ok(objFromFirstGet)
+            assert.ok(invalidatedObj)
+            assert.strictEqual(objFromFirstGet, invalidatedObj)
+            invalidationEventFired = true
+        })
+
+        testMache.get('2.json', function (err, _objFromFirstGet) {
+            assert.ifError(err)
+
+            objFromFirstGet = _objFromFirstGet
+
+            setModifiedTimeOnTestFileToDistantPast('2.json')
+            testMache.get('2.json', function (err, objFromSecondGet) {
+                assert.ifError(err)
+                assert.ok(invalidationEventFired)
+                done()
+            })
+        })
+    })
+})
+
+function setModifiedTimeOnTestFileToDistantPast (testFile) {
+    var testFilePath = path.join(testDir, testFile)
+    var oldTime = new Date("June 4, 1981 18:00:00")
+    fs.utimesSync(testFilePath, oldTime, oldTime)
+}
+
+function setModifiedTimeOnTestFileToNow (testFile) {
+    var testFilePath = path.join(testDir, testFile)
+    var newTime = new Date()
+    fs.utimesSync(testFilePath, newTime, newTime)
+}
