@@ -103,6 +103,21 @@ describe("#baseDir", function () {
             done()
         })
     })
+
+    it("should return the same directory on subsequent calls", function (done) {
+        testMache.baseDir(function (err, firstResult) {
+            assert.ifError(err)
+            assert.ok(firstResult)
+
+            testMache.baseDir(function (err, secondResult) {
+                assert.ifError(err)
+                assert.ok(secondResult)
+
+                assert.strictEqual(firstResult, secondResult)
+                done()
+            })
+        })
+    })
 })
 
 describe("#on invalidation", function () {
