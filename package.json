@@ -8,14 +8,16 @@
   },
   "devDependencies": {
     "mocha": "~1.9.0",
-    "temp": "~0.5.0"
+    "temp": "~0.5.0",
+    "istanbul": "~0.1.35"
   },
   "engines": {
     "node": ">=0.8.0"
   },
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
-    "debug": "./node_modules/mocha/bin/mocha --debug-brk"
+    "debug": "./node_modules/mocha/bin/mocha --debug-brk",
+    "coverage": "node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha"
   },
   "repository": {
     "type": "git",
