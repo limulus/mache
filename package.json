@@ -4,12 +4,12 @@
   "description": "An in-memory, self-invalidating, file-to-object cache.",
   "main": "index.js",
   "dependencies": {
-    "subdir": "~0.0.2"
+    "subdir": "~0.0.3"
   },
   "devDependencies": {
-    "mocha": "~1.9.0",
-    "temp": "~0.5.0",
-    "istanbul": "~0.1.35"
+    "mocha": "~1.12.0",
+    "temp": "~0.5.1",
+    "istanbul": "~0.1.42"
   },
   "engines": {
     "node": ">=0.8.0"
@@ -21,8 +21,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/limulus/mache.git"
+    "url": "git://github.com/limulus/mache.git"
   },
+  "homepage": "https://github.com/limulus/mache",
   "keywords": [
     "mache",
     "cache",
@@ -35,5 +36,8 @@
       "url": "http://www.limulus.net/"
     }
   ],
+  "bugs": {
+    "url": "https://github.com/limulus/mache/issues"
+  },
   "license": "MIT"
 }
