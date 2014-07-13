@@ -78,12 +78,12 @@ Calls the given callback with two arguments:
   * The real path to the base directory.
 
 
-  Events
-  ------
+Events
+------
 
-  Mache instance objects inherit from EventEmitter, so you can listen for events via the `on()` method.
+Mache instance objects inherit from EventEmitter, so you can listen for events via the `on()` method.
 
-  ### invalidation
+### invalidation
 
-  This event is emitted when an object has been removed from the cache, either due to the underlying file getting updated or deleted. The relevant object is passed to the even handler. This is useful for performing cleanup tasks for an object that is no longer being retained by the Mache instance.
+This event is emitted when an object has been removed from the cache, either due to the underlying file getting updated or deleted. The relevant object is passed to the even handler. This is useful for performing cleanup tasks for an object that is no longer being retained by the Mache instance.
 
