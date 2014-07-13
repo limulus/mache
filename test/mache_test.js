@@ -6,6 +6,9 @@ var mache = require('../index.js')
   , fs = require('fs')
   , path = require('path')
 
+// Automatically track and cleanup files at exit.
+temp.track();
+
 // Temporary directory to base our mache out of.
 var testDir = fs.realpathSync(temp.mkdirSync())
 
