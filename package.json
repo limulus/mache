@@ -4,6 +4,7 @@
   "description": "An in-memory, self-invalidating, file-to-object cache.",
   "main": "index.js",
   "dependencies": {
+    "promise": "^5.0.0",
     "subdir": "^0.0.3"
   },
   "devDependencies": {

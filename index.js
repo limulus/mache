@@ -5,7 +5,7 @@ var fs = require('fs')
   , subdir = require('subdir')
   , EventEmitter = require('events').EventEmitter
   , inherits = require('util').inherits
-
+  , Promise = require('promise')
 
 /**
  * @public
@@ -32,6 +32,7 @@ var Mache = function (baseDirPath, objectCreator) {
     this._objectCreator = objectCreator
     this._cache = {}
     this._fullPathCache = {}
+    this._getInProgressPromise = {}
 }
 inherits(Mache, EventEmitter)
 
@@ -59,25 +60,48 @@ Mache.prototype.baseDir = function (result) {
  * @param {function(Error?, *)} result
  */
 Mache.prototype.get = function (file, result) {
-    var cachedMtime, cachedObj
-    if (this._cache[file]) {
-        cachedMtime = this._cache[file][0]
-        cachedObj = this._cache[file][1]
+    if (! this._getInProgressPromise[file]) {
+        this._getInProgressPromise[file] = this._doGetForFile(file)
     }
 
-    this._mtimeForFile(file, function (err, currentMtime) {
-        if (err) return result(err)
+    this._getInProgressPromise[file].then(function (obj) {
+        this._getInProgressPromise[file] = undefined
+        return result(null, obj)
+    }.bind(this), function (err) {
+        this._getInProgressPromise[file] = undefined
+        return result(err)
+    }.bind(this))
+}
 
-        if (cachedMtime === currentMtime) {
-            return result(null, cachedObj)
+/**
+ * Compares file modification times, and updates the cache if necessary.
+ * @private
+ * @param {string} file
+ * @return {Promise}
+ */
+Mache.prototype._doGetForFile = function (file) {
+    return new Promise(function (resolve, reject) {
+        var cachedMtime, cachedObj
+        if (this._cache[file]) {
+            cachedMtime = this._cache[file][0]
+            cachedObj = this._cache[file][1]
         }
-        else {
-            if (cachedObj) {
-                this._invalidateCachedObjForFile(cachedObj, file)
+
+        this._mtimeForFile(file, function (err, currentMtime) {
+            if (err) return reject(err)
+
+            if (cachedMtime === currentMtime) {
+                return resolve(cachedObj)
             }
+            else {
+                if (cachedObj) {
+                    this._invalidateCachedObjForFile(cachedObj, file)
+                }
 
-            this._updateCacheForFileWithMtime(file, currentMtime, result)
-        }
+                this._updateCacheForFileWithMtime(file, currentMtime)
+                    .then(resolve, reject)
+            }
+        }.bind(this))
     }.bind(this))
 }
 
@@ -102,16 +126,19 @@ Mache.prototype._mtimeForFile = function (file, result) {
  * @private
  * @param {string} file
  * @param {number} mtime
- * @param {function(Error?, *)}
+ * @param {function(*)} resolve
+ * @param {function(*)} reject
  */
-Mache.prototype._updateCacheForFileWithMtime = function (file, mtime, result) {
-    this._stringContentForFile(file, function (err, data) {
-        if (err) return result(err)
+Mache.prototype._updateCacheForFileWithMtime = function (file, mtime) {
+    return new Promise(function (resolve, reject) {
+        this._stringContentForFile(file, function (err, data) {
+            if (err) return reject(err)
 
-        var objectCreator = this._objectCreator
-        objectCreator(file, data, function (obj) {
-            this._cache[file] = [mtime, obj]
-            return result(null, obj)
+            var objectCreator = this._objectCreator
+            objectCreator(file, data, function (obj) {
+                this._cache[file] = [mtime, obj]
+                return resolve(obj)
+            }.bind(this))
         }.bind(this))
     }.bind(this))
 }
