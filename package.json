@@ -1,6 +1,6 @@
 {
   "name": "mache",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "An in-memory, self-invalidating, file-to-object cache.",
   "main": "index.js",
   "dependencies": {
