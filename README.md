@@ -67,6 +67,8 @@ Callback arguments:
   * An error object.
   * The object for the given file, as created by the object creation callback.
 
+Returns a standard promise object which can be used in lieu of providing a callback.
+
 
 ### baseDir(callback)
 
@@ -74,4 +76,14 @@ Calls the given callback with two arguments:
 
   * An error object if there was an error finding the real path to the base directory.
   * The real path to the base directory.
+
+
+  Events
+  ------
+
+  Mache instance objects inherit from EventEmitter, so you can listen for events via the `on()` method.
+
+  ### invalidation
+
+  This event is emitted when an object has been removed from the cache, either due to the underlying file getting updated or deleted. The relevant object is passed to the even handler. This is useful for performing cleanup tasks for an object that is no longer being retained by the Mache instance.
 
