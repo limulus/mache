@@ -11,7 +11,6 @@ temp.track();
 
 // Temporary directory to base our mache out of.
 var testDir = fs.realpathSync(temp.mkdirSync())
-console.log(testDir)
 
 // Create some files in the temporary directory so we have something to test.
 var testData1 = '{"id": 1}'
