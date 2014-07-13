@@ -115,6 +115,26 @@ describe('#get', function () {
             }
         }
     })
+
+    it("should return a promise object that gets resolved on success", function (done) {
+        testMache.get('2.json').then(function (obj) {
+            assert(obj)
+            done()
+        }, function (err) {
+            assert.ifError(err)
+            done()
+        })
+    })
+
+    it("should return a promise object that gets rejected on failure", function (done) {
+        testMache.get('foo.json').then(function (obj) {
+            assert.ifError(obj)
+            done()
+        }, function (err) {
+            assert(err)
+            done()
+        })
+    })
 })
 
 describe("#baseDir", function () {
