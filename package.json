@@ -4,12 +4,12 @@
   "description": "An in-memory, self-invalidating, file-to-object cache.",
   "main": "index.js",
   "dependencies": {
-    "subdir": "~0.0.3"
+    "subdir": "^0.0.3"
   },
   "devDependencies": {
-    "mocha": "~1.12.0",
-    "temp": "~0.5.1",
-    "istanbul": "~0.1.42"
+    "mocha": "^1.12.0",
+    "temp": "^0.8.0",
+    "istanbul": "^0.1.42"
   },
   "engines": {
     "node": ">=0.8.0"
