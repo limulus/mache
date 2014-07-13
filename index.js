@@ -57,7 +57,7 @@ Mache.prototype.baseDir = function (result) {
 /**
  * @public
  * @param {string} file
- * @param {function(Error?, *)} result
+ * @param {function(Error?, *)} result?
  * @return {Promise}
  */
 Mache.prototype.get = function (file, result) {
@@ -67,10 +67,10 @@ Mache.prototype.get = function (file, result) {
 
     this._getInProgressPromise[file].then(function (obj) {
         this._getInProgressPromise[file] = undefined
-        return result(null, obj)
+        if (result) return result(null, obj)
     }.bind(this), function (err) {
         this._getInProgressPromise[file] = undefined
-        return result(err)
+        if (result) return result(err)
     }.bind(this))
 
     return this._getInProgressPromise[file]
