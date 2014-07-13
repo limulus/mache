@@ -75,6 +75,43 @@ describe('#get', function () {
             })
         })
     })
+
+    it("should return the cached object when object creation callback is in-flight (to prevent cache stampedes)", function (done) {
+        // To test this, we make a object creation callback that is slow on
+        // the first call, but fast on subsequent calls. Calling mache.get()
+        // twice, we make sure the object from the first get is the first
+        // object that gets created.
+
+        var objectsCreated = 0
+        testMache = mache.create(testDir, function (filePath, data, macheUpdate) {
+            var obj = { id: objectsCreated }
+            if (objectsCreated === 0) {
+                setTimeout(function () { macheUpdate(obj) }, 20)
+            }
+            else {
+                macheUpdate(obj)
+            }
+            objectsCreated += 1
+        })
+
+        var obj1, obj2
+        testMache.get('1.json', function (err, obj) {
+            obj1 = obj
+            runAssertionsIfDone()
+        })
+        testMache.get('1.json', function (err, obj) {
+            obj2 = obj
+            runAssertionsIfDone()
+        })
+
+        function runAssertionsIfDone () {
+            if (obj1 && obj2) {
+                assert.strictEqual(obj1.id, obj2.id)
+                assert.strictEqual(obj1.id, 0)
+                done()
+            }
+        }
+    })
 })
 
 describe("#baseDir", function () {
